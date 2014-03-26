@@ -1,110 +1,104 @@
 ###############################################################################
 # Creates a navigation bar that stays put when the user scrolls
 ###############################################################################
+"use strict"
 
 ( ($) ->
-
-    drmStickyNav = {
-
-        config: {
-            nav: $ '.drm-sticky-nav'
-            activeClass: 'active'
-            content: $ '.sticky-nav-content'
-        }
-
-        init: (config) ->
-            $.extend @.config, config
-            links = drmStickyNav.config.nav.find 'a[href^="#"]'
+    class window.DrmStickyNav
+        constructor: (@nav = $('nav.drm-sticky-nav'), @activeClass = 'active', @content = $('div.sticky-nav-content')) ->
+            self = @
+            links = self.nav.find 'a[href^="#"]'
             hash = window.location.hash
-            content = drmStickyNav.config.content
+            content = self.content
             
             if hash
-                hashLink = drmStickyNav.config.nav.find "a[href='#{hash}']"
-                hashLink.addClass drmStickyNav.config.activeClass
-                drmStickyNav.config.nav.on 'click', "a[href='#{hash}']", @goToSection
+                hashLink = self.nav.find "a[href='#{hash}']"
+                hashLink.addClass self.activeClass
+                self.nav.on 'click', "a[href='#{hash}']", self.goToSection
                 hashLink.trigger 'click'
             else    
-                links.first().addClass drmStickyNav.config.activeClass
+                links.first().addClass self.activeClass
 
-            if drmStickyNav.config.nav.length > 0
-                navPosition = drmStickyNav.config.nav.position().top
-                positions = @.findPositions(content)
-                spy = -> drmStickyNav.scrollSpy positions
-                affix = -> drmStickyNav.affixNav navPosition
-                $(window).on 'scroll', affix
-                $(window).on 'scroll', spy
+            unless self.nav.length is 0
+                navPosition = self.nav.position().top
+                $(window).on 'scroll', -> self.affixNav navPosition
+                $(window).on 'scroll', self.scrollSpy
 
-            drmStickyNav.config.nav.on 'click', 'a[href^="#"]', @goToSection
+            self.nav.on 'click', 'a[href^="#"]', -> self.goToSection.call @, self.activeClass
 
-        affixNav: (navPosition) ->
+        affixNav: (navPosition) =>
             scroll = $('body').scrollTop()
-            position = drmStickyNav.config.nav.data 'position'
+            position = @nav.data 'position'
 
             if scroll > (navPosition - 100)
-                drmStickyNav.config.nav.addClass "sticky-#{position}"
+                @nav.addClass "sticky-#{position}"
             else
-                drmStickyNav.config.nav.removeClass "sticky-#{position}"
+                @nav.removeClass "sticky-#{position}"
 
-        goToSection: (e) ->
+        goToSection: (activeClass) ->
             that = $ @
             target = that.attr 'href'
             content = $ 'body'
 
-            e.preventDefault()
-
-            $('a.active').removeClass drmStickyNav.config.activeClass
-            that.addClass drmStickyNav.config.activeClass
+            $('a.active').removeClass activeClass
+            that.addClass activeClass
 
             content.stop().animate {
-                'scrollTop': $(target).position().top  
+                'scrollTop': $(target).position().top
             }, 900, 'swing', ->
                 window.location.hash = target
                 return
 
-        scrollSpy: (positions) ->
+            return false
+
+        scrollSpy: =>
             scroll = $('body').scrollTop()
-            links = drmStickyNav.config.nav.find 'a[href^="#"]'
+            links = @nav.find 'a[href^="#"]'
+            positions = @findPositions()
 
-            $.each positions, (index, value) ->
-                if scroll == 0
-                    $('a.active').removeClass drmStickyNav.config.activeClass  
-                    links.eq(0).addClass drmStickyNav.config.activeClass
-                # if value is less than scroll add activeClass to link with the same index
+            $.each positions, (index, value) =>
+                # console.log "value: #{value} : scroll: #{scroll}"
+                if scroll is 0
+                    $("a.#{@activeClass}").removeClass @activeClass  
+                    links.eq(0).addClass @activeClass
+                # if value is less than scroll add @activeClass to link with the same index
                 else if value < scroll
-                    $('a.active').removeClass drmStickyNav.config.activeClass  
-                    links.eq(index).addClass drmStickyNav.config.activeClass
+                    $("a.#{@activeClass}").removeClass @activeClass
+                    links.eq(index).addClass @activeClass
 
-        findPositions: (content) ->
-            content = drmStickyNav.config.content
-            sections = content.find 'section'
+        findPositions: =>
+            sections = @content.find 'section'
             positions = []
             # populate positions array with the position of the top of each section element 
             sections.each (index) ->
                 that = $ @
                 length = sections.length
 
-                # the first element's position should always be 0
-                if index == 0
-                    position = 0
-                # subtract the bottom container's full height so final scroll value is equivalent 
-                # to last container's position  
-                else if index == length - 1
-                    if that.height() > 200
+                getPosition = (height) ->
+                    if height > 200
                         position = that.position().top - (that.height() / 2)
                     else    
                         position = that.position().top - that.height()
-                # for all other elements correct position by only subtracting half of its height 
+                    position
+
+                # the first element's position should always be 0
+                if index is 0
+                    position = 0
+                # subtract the bottom container's full height so final scroll value is equivalent 
+                # to last container's position  
+                else if index is length - 1
+                    position = getPosition that.height()
+                # for all other elements correct position by only subtracting half of its height
                 # from its top position
                 else
                     position = that.position().top - (that.height() / 2)
 
                 # correct for any elements that may have a negative position value  
                 if position < 0 then positions.push 0 else positions.push position
-                return positions           
+                positions           
 
-            return positions        
-    }
+            positions
 
-    drmStickyNav.init()
+    new DrmStickyNav()
 
 ) jQuery
