@@ -5,35 +5,53 @@
 
 ( ($) ->
     class window.DrmStickyNav
-        constructor: (@nav = $('nav.drm-sticky-nav'), @activeClass = 'active', @content = $('div.sticky-nav-content')) ->
+        constructor: (@nav = $('nav.drm-sticky-nav'), @activeClass = 'active', @content = $('div.sticky-nav-content'), @spy = yes) ->
             self = @
             links = self.nav.find 'a[href^="#"]'
             hash = window.location.hash
-            content = self.content
             
             if hash
                 hashLink = self.nav.find "a[href='#{hash}']"
                 hashLink.addClass self.activeClass
                 self.nav.on 'click', "a[href='#{hash}']", self.goToSection
                 hashLink.trigger 'click'
-            else    
+            else
                 links.first().addClass self.activeClass
 
             unless self.nav.length is 0
-                navPosition = self.nav.position().top
-                $(window).on 'scroll', -> self.affixNav navPosition
-                $(window).on 'scroll', self.scrollSpy
+                win = $(window)
+                navPositionTop = self.nav.position().top
+                win.on 'scroll', -> self.affixNav navPositionTop
+                # win.on 'resize', -> self.positionRight
+                
+                if self.spy
+                    win.on 'scroll', self.scrollSpy
 
             self.nav.on 'click', 'a[href^="#"]', -> self.goToSection.call @, self.activeClass
 
-        affixNav: (navPosition) =>
+        affixNav: (top) =>
             scroll = $('body').scrollTop()
             position = @nav.data 'position'
+            navPositionLeft = @nav.position().left
+            winHeight = $(window).height()
+            navHeight = @nav.height()
+            contentHeight = @content.height()
 
-            if scroll > (navPosition - 100)
+            if scroll > (top + contentHeight)
+                @nav.removeClass "sticky-#{position}"
+            else if scroll > (top - 100) and navHeight < winHeight
                 @nav.addClass "sticky-#{position}"
+                @positionRight navPositionLeft
             else
                 @nav.removeClass "sticky-#{position}"
+
+        positionRight: (navPositionLeft) =>
+            position = @nav.data 'position'
+
+            if position isnt 'top'
+                @nav.css 'left': navPositionLeft
+            else
+                @nav.css 'left': 0
 
         goToSection: (activeClass) ->
             that = $ @
@@ -49,7 +67,7 @@
                 window.location.hash = target
                 return
 
-            return false
+            false
 
         scrollSpy: =>
             scroll = $('body').scrollTop()
@@ -76,10 +94,9 @@
 
                 getPosition = (height) ->
                     if height > 200
-                        position = that.position().top - (that.height() / 2)
+                        that.position().top - (that.height() / 2)
                     else    
-                        position = that.position().top - that.height()
-                    position
+                        that.position().top - that.height()
 
                 # the first element's position should always be 0
                 if index is 0
@@ -95,7 +112,6 @@
 
                 # correct for any elements that may have a negative position value  
                 if position < 0 then positions.push 0 else positions.push position
-                positions           
 
             positions
 
