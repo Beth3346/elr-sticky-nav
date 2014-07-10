@@ -3,64 +3,65 @@
 ###############################################################################
 "use strict"
 
+$ = jQuery
 class @DrmStickyNav
     constructor: (@nav = $('nav.drm-sticky-nav'), @activeClass = 'active', @content = $('div.sticky-nav-content'), @spy = yes) ->
         self = @
-        links = self.nav.find 'a[href^="#"]'
-        hash = window.location.hash
+        _links = self.nav.find 'a[href^="#"]'
+        _hash = window.location.hash
         
-        if hash
-            hashLink = self.nav.find "a[href='#{hash}']"
-            hashLink.addClass self.activeClass
-            self.nav.on 'click', "a[href='#{hash}']", self.goToSection
-            hashLink.trigger 'click'
+        if _hash
+            _hashLink = self.nav.find "a[href='#{_hash}']"
+            _hashLink.addClass self.activeClass
+            self.nav.on 'click', "a[href='#{_hash}']", self.goToSection
+            _hashLink.trigger 'click'
         else
-            links.first().addClass self.activeClass
+            _links.first().addClass self.activeClass
 
         unless self.nav.length is 0
-            win = $(window)
+            _win = $(window)
             navPositionTop = self.nav.position().top
-            win.on 'scroll', -> self.affixNav navPositionTop
-            # win.on 'resize', -> self.positionRight
+            _win.on 'scroll', -> self.affixNav navPositionTop
+            # _win.on 'resize', -> self.positionRight
             
             if self.spy
-                win.on 'scroll', self.scrollSpy
+                _win.on 'scroll', self.scrollSpy
 
         self.nav.on 'click', 'a[href^="#"]', -> self.goToSection.call @, self.activeClass
 
     affixNav: (top) =>
-        scroll = $('body').scrollTop()
-        position = @nav.data 'position'
+        _scroll = $('body').scrollTop()
+        _position = @nav.data 'position'
         navPositionLeft = @nav.position().left
-        winHeight = $(window).height()
-        navHeight = @nav.height()
-        contentHeight = @content.height()
+        _winHeight = $(window).height()
+        _navHeight = @nav.height()
+        _contentHeight = @content.height()
 
-        if scroll > (top + contentHeight)
-            @nav.removeClass "sticky-#{position}"
-        else if scroll > (top - 100) and navHeight < winHeight
-            @nav.addClass "sticky-#{position}"
+        if _scroll > (top + _contentHeight)
+            @nav.removeClass "sticky-#{_position}"
+        else if _scroll > (top - 50) and _navHeight < _winHeight
+            @nav.addClass "sticky-#{_position}"
             @positionRight navPositionLeft
         else
-            @nav.removeClass "sticky-#{position}"
+            @nav.removeClass "sticky-#{_position}"
 
     positionRight: (navPositionLeft) =>
-        position = @nav.data 'position'
+        _position = @nav.data 'position'
 
-        if position isnt 'top'
+        if _position isnt 'top'
             @nav.css 'left': navPositionLeft
         else
             @nav.css 'left': 0
 
     goToSection: (activeClass) ->
-        that = $ @
-        target = that.attr 'href'
-        content = $ 'body'
+        _that = $ @
+        target = _that.attr 'href'
+        _content = $ 'body'
 
         $('a.active').removeClass activeClass
-        that.addClass activeClass
+        _that.addClass activeClass
 
-        content.stop().animate {
+        _content.stop().animate {
             'scrollTop': $(target).position().top
         }, 900, 'swing', ->
             window.location.hash = target
@@ -77,29 +78,29 @@ class @DrmStickyNav
             positions = []
             # populate positions array with the position of the top of each section element 
             sections.each (index) ->
-                that = $ @
-                length = sections.length
+                _that = $ @
+                _length = sections.length
 
                 getPosition = (height) ->
                     if height > 200
-                        that.position().top - (that.height() / 2)
+                        _that.position().top - (_that.height() / 2)
                     else    
-                        that.position().top - that.height()
+                        _that.position().top - _that.height()
 
                 # the first element's position should always be 0
                 if index is 0
-                    position = 0
+                    _position = 0
                 # subtract the bottom container's full height so final scroll value is equivalent 
                 # to last container's position  
-                else if index is length - 1
-                    position = getPosition that.height()
+                else if index is _length - 1
+                    _position = getPosition _that.height()
                 # for all other elements correct position by only subtracting half of its height
                 # from its top position
                 else
-                    position = that.position().top - (that.height() / 2)
+                    _position = _that.position().top - (_that.height() / 2)
 
-                # correct for any elements that may have a negative position value  
-                if position < 0 then positions.push 0 else positions.push position
+                # correct for any elements _that may have a negative position value  
+                if _position < 0 then positions.push 0 else positions.push _position
 
             positions
 
