@@ -1,16 +1,21 @@
-# DRM Sticky Nav
+# ELR Sticky Nav
 
 [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
 
-Sticky navigation with scrollspy
-Requires jQuery
+A jQuery component
 
-## Features:
+### Dependencies:
 
-## Usage:
++ jQuery
 
-### Initialize:
+### Features:
 
-#### Options:
+### Config:
 
-#### Examples:
+### Example Usage:
+
+#### Sample html
+
+###License
+
+ELR-Sticky Nav is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT)
