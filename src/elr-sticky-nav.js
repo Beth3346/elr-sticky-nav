@@ -1,90 +1,72 @@
-(function($) {
-    window.elrStickyNav = function(params) {
-        var self = {};
-        var spec = params || {};
-        var $nav = spec.nav || $('nav.elr-sticky-nav');
-        var activeClass = spec.activeClass || 'active';
-        var $content = spec.content || $('div.sticky-nav-content');
-        var sectionEl = spec.sectionEl || 'section';
-        var spy = spec.spy || true;
-        var $links = $nav.find('a[href^="#"]');
-        var hash = window.location.hash;
+import elrUtlities from 'elr-utilities';
+const $ = require('jquery');
 
-        var affixNav = function(top) {
-            var scroll = $('body').scrollTop();
-            var position = $nav.data('position');
-            var navPositionLeft = $nav.position().left;
-            var winHeight = $(window).height();
-            var navHeight = $nav.height();
-            var contentHeight = $content.height();
+let elr = elrUtlities();
 
-            if ( scroll > ( top + contentHeight ) ) {
-                $nav.removeClass('sticy-' + position);
-            } else if ( ( scroll > (top - 50) ) && ( navHeight < winHeight ) ) {
-                $nav.addClass('sticky-' + position);
-                positionRight(navPositionLeft);
-            } else {
-                $nav.removeClass('sticky-' + position);
-            }
-        };
+const elrStickyNav = function({
+    $nav = $('nav.elr-sticky-nav'),
+    activeClass = 'active',
+    $content = $('div.sticky-nav-content'),
+    sectionEl = 'section',
+    spy = false
+} = {}) {
+    // const self = {};
 
-        var positionRight = function(navPositionLeft) {
-            var position = $nav.data('position');
+    // make a more general function and add to elr utilities
+    const affixElement = function($el, top) {
+        const $win = $(window);
+        const winHeight = $win.height();
+        const scroll = $(document).scrollTop();
+        const position = $el.data('position');
+        const elementHeight = $el.height();
+        const contentHeight = $content.height();
 
-            if ( position !== 'top' ) {
-                $nav.css({'left': navPositionLeft});
-            } else {
-                $nav.css({'left': 0});
-            }
-        };
-
-        var gotoSection = function(activeClass) {
-            var $that = $(this);
-            var target = $that.attr('href');
-            var $content = $('body');
-            var $target = $(target);
-
-            $('a.active').removeClass(activeClass);
-            $that.addClass(activeClass);
-
-            $content.stop().animate({
-                'scrollTop': ($target.position().top - 50)
-            });
-
-            return false;
-        };
-
-        if ( hash ) {
-            var $hashLink = $nav.find("a[href='" + hash + "']");
-
-            $hashLink.addClass(activeClass);
-            $hashLink.trigger('click');
-            $nav.on('click', "a[href='" + hash + "']", function() {
-                gotoSection.call(this, activeClass);
-            });
+        if (scroll > (top + contentHeight)) {
+            $el.removeClass(`sticky-${position}`);
+        } else if (scroll > (top - 50) && elementHeight < winHeight) {
+            $el.addClass(`sticky-${position}`);
         } else {
-            $links.first().addClass(activeClass);
+            $el.removeClass(`sticky-${position}`);
         }
-
-        if ( $nav.length ) {
-            var $win = $(window);
-            var navPositionTop = $nav.position().top;
-
-            $win.on('scroll', function() {
-                affixNav(navPositionTop);
-            });
-
-            if ( spy ) {
-                $win.on('scroll', function() {
-                    elr.scrollSpy($nav, $content, sectionEl, activeClass );
-                });
-            }
-
-            $nav.on('click', 'a[href^="#"]', function() {
-                gotoSection.call(this, activeClass);
-            });
-        }
-
-        return self;
     };
-})(jQuery);
+
+    const gotoSection = function(offset) {
+        const $target = $(`#${$(this).attr('href').slice(1)}`);
+        const $content = $('body, html');
+
+        $content.stop().animate({
+            'scrollTop': $target.position().top - offset
+        });
+
+        return false;
+    };
+
+    if ($nav.length) {
+        const $win = $(window);
+        const $links = $nav.find('a[href^="#"]');
+        const hash = window.location.hash;
+        const navPositionTop = $nav.offset().top;
+        const navPositionLeft = $nav.offset().left;
+
+        $win.on('scroll', function() {
+            affixElement($nav, navPositionTop);
+        });
+
+        if (spy) {
+            $win.on('scroll', function() {
+                elr.scrollSpy($nav, $content, sectionEl, activeClass);
+            });
+        }
+
+        $nav.on('click', 'a[href^="#"]', function(e) {
+            e.preventDefault();
+            $links.removeClass(activeClass);
+            $(this).addClass(activeClass);
+            gotoSection.call(this, 70);
+        });
+    }
+
+    // return self;
+};
+
+export default elrStickyNav;

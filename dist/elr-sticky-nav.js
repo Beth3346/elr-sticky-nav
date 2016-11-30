@@ -1,90 +1,91 @@
-(function($) {
-    window.elrStickyNav = function(params) {
-        var self = {};
-        var spec = params || {};
-        var $nav = spec.nav || $('nav.elr-sticky-nav');
-        var activeClass = spec.activeClass || 'active';
-        var $content = spec.content || $('div.sticky-nav-content');
-        var sectionEl = spec.sectionEl || 'section';
-        var spy = spec.spy || true;
-        var $links = $nav.find('a[href^="#"]');
-        var hash = window.location.hash;
+'use strict';
 
-        var affixNav = function(top) {
-            var scroll = $('body').scrollTop();
-            var position = $nav.data('position');
-            var navPositionLeft = $nav.position().left;
-            var winHeight = $(window).height();
-            var navHeight = $nav.height();
-            var contentHeight = $content.height();
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
-            if ( scroll > ( top + contentHeight ) ) {
-                $nav.removeClass('sticy-' + position);
-            } else if ( ( scroll > (top - 50) ) && ( navHeight < winHeight ) ) {
-                $nav.addClass('sticky-' + position);
-                positionRight(navPositionLeft);
-            } else {
-                $nav.removeClass('sticky-' + position);
-            }
-        };
+var _elrUtilities = require('elr-utilities');
 
-        var positionRight = function(navPositionLeft) {
-            var position = $nav.data('position');
+var _elrUtilities2 = _interopRequireDefault(_elrUtilities);
 
-            if ( position !== 'top' ) {
-                $nav.css({'left': navPositionLeft});
-            } else {
-                $nav.css({'left': 0});
-            }
-        };
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-        var gotoSection = function(activeClass) {
-            var $that = $(this);
-            var target = $that.attr('href');
-            var $content = $('body');
-            var $target = $(target);
+var $ = require('jquery');
 
-            $('a.active').removeClass(activeClass);
-            $that.addClass(activeClass);
+var elr = (0, _elrUtilities2.default)();
 
-            $content.stop().animate({
-                'scrollTop': ($target.position().top - 50)
-            });
+var elrStickyNav = function elrStickyNav() {
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref$$nav = _ref.$nav,
+        $nav = _ref$$nav === undefined ? $('nav.elr-sticky-nav') : _ref$$nav,
+        _ref$activeClass = _ref.activeClass,
+        activeClass = _ref$activeClass === undefined ? 'active' : _ref$activeClass,
+        _ref$$content = _ref.$content,
+        $content = _ref$$content === undefined ? $('div.sticky-nav-content') : _ref$$content,
+        _ref$sectionEl = _ref.sectionEl,
+        sectionEl = _ref$sectionEl === undefined ? 'section' : _ref$sectionEl,
+        _ref$spy = _ref.spy,
+        spy = _ref$spy === undefined ? false : _ref$spy;
 
-            return false;
-        };
+    // const self = {};
 
-        if ( hash ) {
-            var $hashLink = $nav.find("a[href='" + hash + "']");
+    // make a more general function and add to elr utilities
+    var affixElement = function affixElement($el, top) {
+        var $win = $(window);
+        var winHeight = $win.height();
+        var scroll = $(document).scrollTop();
+        var position = $el.data('position');
+        var elementHeight = $el.height();
+        var contentHeight = $content.height();
 
-            $hashLink.addClass(activeClass);
-            $hashLink.trigger('click');
-            $nav.on('click', "a[href='" + hash + "']", function() {
-                gotoSection.call(this, activeClass);
-            });
+        if (scroll > top + contentHeight) {
+            $el.removeClass('sticky-' + position);
+        } else if (scroll > top - 50 && elementHeight < winHeight) {
+            $el.addClass('sticky-' + position);
         } else {
-            $links.first().addClass(activeClass);
+            $el.removeClass('sticky-' + position);
         }
+    };
 
-        if ( $nav.length ) {
+    var gotoSection = function gotoSection(offset) {
+        var $target = $('#' + $(this).attr('href').slice(1));
+        var $content = $('body, html');
+
+        $content.stop().animate({
+            'scrollTop': $target.position().top - offset
+        });
+
+        return false;
+    };
+
+    if ($nav.length) {
+        (function () {
             var $win = $(window);
-            var navPositionTop = $nav.position().top;
+            var $links = $nav.find('a[href^="#"]');
+            var hash = window.location.hash;
+            var navPositionTop = $nav.offset().top;
+            var navPositionLeft = $nav.offset().left;
 
-            $win.on('scroll', function() {
-                affixNav(navPositionTop);
+            $win.on('scroll', function () {
+                affixElement($nav, navPositionTop);
             });
 
-            if ( spy ) {
-                $win.on('scroll', function() {
-                    elr.scrollSpy($nav, $content, sectionEl, activeClass );
+            if (spy) {
+                $win.on('scroll', function () {
+                    elr.scrollSpy($nav, $content, sectionEl, activeClass);
                 });
             }
 
-            $nav.on('click', 'a[href^="#"]', function() {
-                gotoSection.call(this, activeClass);
+            $nav.on('click', 'a[href^="#"]', function (e) {
+                e.preventDefault();
+                $links.removeClass(activeClass);
+                $(this).addClass(activeClass);
+                gotoSection.call(this, 70);
             });
-        }
+        })();
+    }
 
-        return self;
-    };
-})(jQuery);
+    // return self;
+};
+
+exports.default = elrStickyNav;
