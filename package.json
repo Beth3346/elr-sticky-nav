@@ -1,6 +1,6 @@
 {
   "name": "elr-sticky-nav",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "sticky navigation with scroll spy",
   "main": "dist/elr-sticky-nav.js",
   "repository": {
