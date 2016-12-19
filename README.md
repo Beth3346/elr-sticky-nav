@@ -1,4 +1,9 @@
-# elr-sticky-nav 
+# elr-sticky-nav
+
+[![Build Status](https://travis-ci.org/Beth3346/elr-sticky-nav.svg?branch=master)](https://travis-ci.org/Beth3346/elr-sticky-nav)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![codecov](https://codecov.io/gh/Beth3346/elr-sticky-nav/branch/master/graph/badge.svg)](https://codecov.io/gh/Beth3346/elr-sticky-nav)
+[![npm](https://img.shields.io/npm/dm/elr-sticky-nav.svg?style=flat)]()
 
 sticky navigation with scroll spy
 

@@ -1,7 +1,7 @@
-import elrUtlities from 'elr-utility-lib';
+import elrUI from 'elr-ui';
 const $ = require('jquery');
 
-let elr = elrUtlities();
+let ui = elrUI();
 
 const elrStickyNav = function({
     $nav = $('nav.elr-sticky-nav'),
@@ -54,7 +54,7 @@ const elrStickyNav = function({
 
         if (spy) {
             $win.on('scroll', function() {
-                elr.scrollSpy($nav, $content, sectionEl, activeClass);
+                ui.scrollSpy($nav, $content, sectionEl, activeClass);
             });
         }
 
